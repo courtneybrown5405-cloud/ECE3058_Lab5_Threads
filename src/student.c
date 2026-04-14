@@ -106,7 +106,8 @@ extern void preempt(unsigned int cpu_id)
  */
 extern void yield(unsigned int cpu_id)
 {
-    /* FIX ME */
+    current[cpu_id]->state = PROCESS_WAITING;
+    schedule(cpu_id);
 }
 
 
