@@ -106,7 +106,10 @@ extern void preempt(unsigned int cpu_id)
  */
 extern void yield(unsigned int cpu_id)
 {
+    pthread_mutex_lock(&current_mutex);
     current[cpu_id]->state = PROCESS_WAITING;
+    //TODO: if error occurs check if schedulue should go in here
+    pthread_mutex_unlock(&current_mutex);
     schedule(cpu_id);
 }
 
