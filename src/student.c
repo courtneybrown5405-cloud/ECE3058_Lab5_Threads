@@ -32,6 +32,10 @@ extern void wake_up(pcb_t *process);
 static pcb_t **current;
 static pthread_mutex_t current_mutex;
 
+static pcb_t *ready_head = NULL;
+static pcb_t *ready_tail = NULL;
+static pthread_mutex_t ready_mutex;
+
 
 /*
  * schedule() is your CPU scheduler.  It should perform the following tasks:
