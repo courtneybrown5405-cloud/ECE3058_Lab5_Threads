@@ -34,7 +34,9 @@ static pthread_mutex_t current_mutex;
 
 static pcb_t *ready_head = NULL;
 static pcb_t *ready_tail = NULL;
-static pthread_mutex_t ready_mutex;
+static pthread_mutex_t ready_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 
 /*
@@ -134,8 +136,8 @@ extern void terminate(unsigned int cpu_id)
  *   2. If the scheduling algorithm is LRTF, wake_up() may need
  *      to preempt the CPU with lower remaining time left to allow it to
  *      execute the process which just woke up with higher reimaing time.
- * 	However, if any CPU is currently running idle,
-* 	or all of the CPUs are running processes
+ * 	    However, if any CPU is currently running idle,
+* 	    or all of the CPUs are running processes
  *      with a higher remaining time left than the one which just woke up, wake_up()
  *      should not preempt any CPUs.
  *	To preempt a process, use force_preempt(). Look in os-sim.h for 
@@ -143,7 +145,28 @@ extern void terminate(unsigned int cpu_id)
  */
 extern void wake_up(pcb_t *process)
 {
-    /* FIX ME */
+    //TODO: POSSIBLE CHANGES: Check if you actually have to do something with preempt 
+    //TODO: Error might occur with creating of cond varaible 
+
+    // Marks process as ready
+    process->state = PROCESS_READY;
+    
+    //Insert into ready queue
+    pthread_mutex_lock(&ready_mutex);
+    if (ready_head == NULL) {
+        ready_head = process;
+        ready_tail = process;
+        process->next = NULL;
+    } else {
+        ready_tail->next = process;
+        ready_tail = process;
+        process->next = NULL;
+    }
+    pthread_mutex_unlock(&ready_mutex);
+
+    pthread_cond_signal(&cond);
+
+
 }
 
 
