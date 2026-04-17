@@ -57,7 +57,34 @@ static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
  */
 static void schedule(unsigned int cpu_id)
 {
-    /* FIX ME */
+    pcb_t *process;
+    //Pop head of ready queue
+    pthread_mutex_lock(&ready_mutex);
+    if (ready_head == NULL) {
+        process = ready_head;
+    } else {
+        process = ready_head;
+        ready_head = ready_head->next;
+        if(ready_head == NULL) ready_tail = NULL;
+        process->next = NULL;
+    }
+    pthread_mutex_unlock(&ready_mutex);
+
+    //Set the process to running 
+    if (process == NULL) {
+        pthread_mutex_lock(&current_mutex);
+        current[cpu_id] = NULL;
+        pthread_mutex_unlock(&current_mutex);
+        context_switch(cpu_id, NULL, -1);
+    } else {
+        //update state & call context switch 
+        pthread_mutex_lock(&current_mutex);
+        current[cpu_id] = process;
+        current[cpu_id]->state = PROCESS_RUNNING;
+        pthread_mutex_unlock(&current_mutex);
+        context_switch(cpu_id, process, -1);
+    }
+
 }
 
 
@@ -70,19 +97,12 @@ static void schedule(unsigned int cpu_id)
  */
 extern void idle(unsigned int cpu_id)
 {
-    /* FIX ME */
-    schedule(0);
-
-    /*
-     * REMOVE THE LINE BELOW AFTER IMPLEMENTING IDLE()
-     *
-     * idle() must block when the ready queue is empty, or else the CPU threads
-     * will spin in a loop.  Until a ready queue is implemented, we'll put the
-     * thread to sleep to keep it from consuming 100% of the CPU time.  Once
-     * you implement a proper idle() function using a condition variable,
-     * remove the call to mt_safe_usleep() below.
-     */
-    mt_safe_usleep(1000000);
+    pthread_mutex_lock(&ready_mutex);
+    while(ready_head == NULL) {
+        pthread_cond_wait(&cond, &ready_mutex);
+    }
+    pthread_mutex_unlock(&ready_mutex);
+    schedule(cpu_id);
 }
 
 
@@ -96,6 +116,7 @@ extern void idle(unsigned int cpu_id)
 extern void preempt(unsigned int cpu_id)
 {
     /* FIX ME */
+    //TODO: Error Might cause error since nothing is implemented.
 }
 
 
@@ -110,7 +131,7 @@ extern void yield(unsigned int cpu_id)
 {
     pthread_mutex_lock(&current_mutex);
     current[cpu_id]->state = PROCESS_WAITING;
-    //TODO: if error occurs check if schedulue should go in here
+    //TODO: Error if error occurs check if schedulue should go in here
     pthread_mutex_unlock(&current_mutex);
     schedule(cpu_id);
 }
@@ -165,11 +186,8 @@ extern void wake_up(pcb_t *process)
         ready_tail = process;
         process->next = NULL;
     }
-    pthread_mutex_unlock(&ready_mutex);
-
     pthread_cond_signal(&cond);
-
-
+    pthread_mutex_unlock(&ready_mutex);
 }
 
 
