@@ -186,7 +186,7 @@ extern void wake_up(pcb_t *process)
         ready_tail = process;
         process->next = NULL;
     }
-    pthread_cond_signal(&cond);
+    pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&ready_mutex);
 }
 
