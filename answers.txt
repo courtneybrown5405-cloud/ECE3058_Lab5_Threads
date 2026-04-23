@@ -7,10 +7,10 @@ GT Username: cbrown626
 Problem 1B
 ----------
 
-The simulations for CPUs 1, 2, and 4 had an average execution time of 45.77s. 
-The 1 CPU had the longest execution time at 67.6s, 2 CPUs significantly reduced the execution time to 36.2s. 
+The simulations for CPUs 1, 2, and 4 had an average execution time of 45.57s. 
+The 1 CPU had the longest execution time at approx. 67.6s, 2 CPUs significantly reduced the execution time to appox. 35.8s. 
 However the 4 CPUs, while it did halve the time of the 1 CPU, only marginally reduced the execution time of the 2 CPUs, 
-with an execution time 33.5s. The data shows a non-linear relationship, which is most likely due to limited parallelism. 
+with an execution time approx. 33.3s. The data shows a non-linear relationship, which is most likely due to limited parallelism. 
 This is evident by the increased idle/waiting time in the system as the number of CPUs increases. 
 The single CPU showed minimal idle time, while the transition to 2 or 4 CPUs showed a significant increase in idle time. 
 Thus as idle time increases with the number of CPUs, the more inefficient core utilization becomes.
